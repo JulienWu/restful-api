@@ -1,9 +1,12 @@
 #!flask/bin/python
 from flask import Flask, jsonify, request
+#from flask.ext.cors import CORS
 import pyhs2
 import subprocess
 from subprocess import call
+import json
 app = Flask(__name__)
+#CORS(app)
 def import_external_table(host,port,table_name,import_path):
   try:
     with pyhs2.connect(host=host,port=port,authMechanism="PLAIN",user='hadoo',password='hadoop',database='default') as conn:
@@ -18,11 +21,19 @@ def import_external_table(host,port,table_name,import_path):
     return 1
 		
 
-@app.route('/<project_name>/api/loadDateFromPortal', methods=['POST'])
-def loadDateFromProtal(project_name):
-    print(project_name)
-    Request_json=request.json
-    print("hi")
+@app.route('/dataquality/api/loadDateFromPortal', methods=['GET'])
+def loadDateFromProtal():
+    #response.headers['Access-Control-Allow-Origin'] = '*'
+    #response.headers['Access-Control-Allow-Methods'] = 'POST'
+    #response.headers['Access-Control-Allow-Headers'] = 'x-requested-with,content-type' 
+    hive_table_list = json.loads(request.args.get('hive_table_list'))
+    print(hive_table_list)
+    print(len(hive_table_list))
+    for index,temp in enumerate(hive_table_list):
+	print(str(index)+":"+temp['table_name'])
+  	print(str(index)+":"+temp['hdfs_source_data_block_url'])
+	print(str(index)+":"+temp['hive_table_meta'])
+    return jsonify({'status':"okay"}), 200
     info=[]
     for table in Request_json['hive_table_list']:
 	temp = {
@@ -47,4 +58,4 @@ def loadDateFromProtal(project_name):
     #return 0
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0')
