@@ -19,6 +19,23 @@ def import_external_table(host,port,table_name,import_path):
   except:
     return 1
 
+def call_get_hdfs_adress(table_name,sandbox_ip):
+   try:
+      with pyhs2.connect(host=sandbox_ip,port=10000,authMechanism="PLAIN",user='hadoop',password='hadoop',database='default') as conn:
+         with conn.cursor() as cur:
+         #Show databases
+         #print cur.getDatabases()
+            query="desc formatted "+table_name
+            print(query)
+            cur.execute(query)
+            for i in cur.fetch():
+               #print(i)
+               #print(i[0])
+               if(i[0]=='Location:           '):
+                  return i[1].split("9000")[1]
+   except:
+      return None
+
 def call_distcp(source_data_block_url,dis_data_block_url):
     ret_val=call(["hadoop", "distcp",source_data_block_url,dis_data_block_url])
     return ret_val
