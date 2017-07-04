@@ -19,6 +19,25 @@ def import_external_table(host,port,table_name,import_path):
   except:
     return 1
 
+def call_get_meta_data(table_name):
+   try:
+      with pyhs2.connect(host=sandbox_ip,port=10000,authMechanism="PLAIN",user='hadoop',password='hadoop',database='default') as conn:
+         with conn.cursor() as cur:
+         #Show databases
+         #print cur.getDatabases()
+           cur.execute(query)
+           meta_data=[]
+           for i in cur.fetch():
+               if(i[0]=='' and flag==0):
+                  flag=1
+               elif(i[0]=='' and flag==1):
+                  flag=2
+               elif(flag==1):
+                  meta_data.append((i[0].strip(),i[1].strip()))
+           return meta_data
+   except:
+      return None
+
 def call_get_hdfs_adress(table_name,sandbox_ip):
    try:
       with pyhs2.connect(host=sandbox_ip,port=10000,authMechanism="PLAIN",user='hadoop',password='hadoop',database='default') as conn:
